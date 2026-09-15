@@ -72,7 +72,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-
 const categorias = [
   "Metais",
   "Plásticos",
@@ -104,9 +103,7 @@ const chartConfigSituacoes = {
   },
 };
 
-
 export default function Demo() {
-
   const [materiais, setMateriais] = useState(materiaisIniciais);
 
   const [busca, setBusca] = useState("");
@@ -123,7 +120,6 @@ export default function Demo() {
   const [erroMovimento, setErroMovimento] = useState("");
   const [erroCadastro, setErroCadastro] = useState("");
 
-
   const [novoMaterial, setNovoMaterial] = useState({
     codigo: "",
     material: "",
@@ -133,19 +129,16 @@ export default function Demo() {
     minimo: "",
   });
 
-
   // ========================================
   // INDICADORES
   // ========================================
 
   const indicadores = useMemo(() => {
-
     let normal = 0;
     let baixo = 0;
     let semEstoque = 0;
 
     materiais.forEach((material) => {
-
       const status = descobrirSituacao(material);
 
       if (status === "Normal") {
@@ -159,7 +152,6 @@ export default function Demo() {
       if (status === "Sem estoque") {
         semEstoque++;
       }
-
     });
 
     return {
@@ -168,20 +160,16 @@ export default function Demo() {
       baixo,
       semEstoque,
     };
-
   }, [materiais]);
-
 
   // ========================================
   // FILTROS
   // ========================================
 
   const materiaisFiltrados = useMemo(() => {
-
     const textoBusca = busca.toLowerCase().trim();
 
     return materiais.filter((material) => {
-
       const correspondeBusca =
         material.material.toLowerCase().includes(textoBusca) ||
         material.codigo.toLowerCase().includes(textoBusca);
@@ -201,20 +189,15 @@ export default function Demo() {
         correspondeCategoria &&
         correspondeSituacao
       );
-
     });
-
   }, [materiais, busca, categoria, situacao]);
-
 
   // ========================================
   // GRÁFICO DE CATEGORIAS
   // ========================================
 
   const dadosCategorias = useMemo(() => {
-
     return categorias.map((nomeCategoria) => {
-
       const quantidade = materiais.filter(
         (material) => material.categoria === nomeCategoria
       ).length;
@@ -223,18 +206,14 @@ export default function Demo() {
         categoria: nomeCategoria,
         quantidade,
       };
-
     });
-
   }, [materiais]);
-
 
   // ========================================
   // GRÁFICO DE SITUAÇÕES
   // ========================================
 
   const dadosSituacoes = useMemo(() => {
-
     return [
       {
         nome: "Normal",
@@ -254,33 +233,26 @@ export default function Demo() {
         cor: "#ef4444",
       },
     ];
-
   }, [indicadores]);
-
 
   // ========================================
   // LIMPAR FILTROS
   // ========================================
 
   function limparFiltros() {
-
     setBusca("");
     setCategoria("Todas");
     setSituacao("Todas");
-
   }
-
 
   // ========================================
   // CADASTRAR MATERIAL
   // ========================================
 
   function cadastrarMaterial(event) {
-
     event.preventDefault();
 
     setErroCadastro("");
-
 
     if (
       !novoMaterial.codigo.trim() ||
@@ -290,28 +262,20 @@ export default function Demo() {
       novoMaterial.quantidade === "" ||
       novoMaterial.minimo === ""
     ) {
-
       setErroCadastro("Preencha todos os campos.");
-
       return;
-
     }
-
 
     const quantidade = Number(novoMaterial.quantidade);
     const minimo = Number(novoMaterial.minimo);
 
-
     if (quantidade < 0 || minimo < 0) {
-
       setErroCadastro(
         "Quantidade e estoque mínimo não podem ser negativos."
       );
 
       return;
-
     }
-
 
     const codigoJaExiste = materiais.some(
       (material) =>
@@ -319,18 +283,15 @@ export default function Demo() {
         novoMaterial.codigo.trim().toLowerCase()
     );
 
-
     if (codigoJaExiste) {
-
-      setErroCadastro("Já existe um material com esse código.");
+      setErroCadastro(
+        "Já existe um material com esse código."
+      );
 
       return;
-
     }
 
-
     const materialCriado = {
-
       id: Date.now(),
 
       codigo: novoMaterial.codigo
@@ -346,15 +307,12 @@ export default function Demo() {
       quantidade,
 
       minimo,
-
     };
-
 
     setMateriais((materiaisAtuais) => [
       ...materiaisAtuais,
       materialCriado,
     ]);
-
 
     setNovoMaterial({
       codigo: "",
@@ -365,18 +323,14 @@ export default function Demo() {
       minimo: "",
     });
 
-
     setCadastroAberto(false);
-
   }
-
 
   // ========================================
   // ABRIR MOVIMENTAÇÃO
   // ========================================
 
   function abrirMovimentacao(material) {
-
     setMaterialMovimento(material);
 
     setTipoMovimento("entrada");
@@ -386,125 +340,94 @@ export default function Demo() {
     setErroMovimento("");
 
     setMovimentoAberto(true);
-
   }
-
 
   // ========================================
   // REGISTRAR MOVIMENTAÇÃO
   // ========================================
 
   function registrarMovimentacao(event) {
-
     event.preventDefault();
 
     setErroMovimento("");
 
-
     const quantidade = Number(quantidadeMovimento);
 
-
     if (!quantidade || quantidade <= 0) {
-
       setErroMovimento(
         "A quantidade da movimentação deve ser maior que zero."
       );
 
       return;
-
     }
-
 
     if (
       tipoMovimento === "saida" &&
       quantidade > materialMovimento.quantidade
     ) {
-
       setErroMovimento(
         "A saída não pode ser maior que o saldo disponível."
       );
 
       return;
-
     }
 
-
     setMateriais((materiaisAtuais) => {
-
       return materiaisAtuais.map((material) => {
-
         if (material.id !== materialMovimento.id) {
           return material;
         }
-
 
         const novaQuantidade =
           tipoMovimento === "entrada"
             ? material.quantidade + quantidade
             : material.quantidade - quantidade;
 
-
         return {
           ...material,
           quantidade: novaQuantidade,
         };
-
       });
-
     });
-
 
     setMovimentoAberto(false);
 
     setMaterialMovimento(null);
 
     setQuantidadeMovimento("");
-
   }
-
 
   // ========================================
   // BADGE STATUS
   // ========================================
 
   function mostrarStatus(material) {
-
     const status = descobrirSituacao(material);
 
-
     if (status === "Normal") {
-
       return (
         <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
           Normal
         </Badge>
       );
-
     }
 
-
     if (status === "Estoque baixo") {
-
       return (
         <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">
           Estoque baixo
         </Badge>
       );
-
     }
-
 
     return (
       <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
         Sem estoque
       </Badge>
     );
-
   }
 
-
   return (
-
     <main className="min-h-screen bg-slate-100">
 
       {/* HEADER */}
@@ -531,22 +454,22 @@ export default function Demo() {
 
           </div>
 
-
           <div className="flex flex-wrap items-center gap-3">
 
             <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-xs text-amber-300">
               Ambiente demonstrativo · dados fictícios
             </span>
 
+            {/* BOTÃO VOLTAR */}
+
             <Button
-              asChild
+              render={<Link href="/" />}
+              nativeButton={false}
               variant="outline"
               className="border-slate-700 bg-transparent text-white hover:bg-slate-800 hover:text-white"
             >
-              <Link href="/">
-                <ArrowLeft />
-                Voltar ao site
-              </Link>
+              <ArrowLeft />
+              Voltar ao site
             </Button>
 
           </div>
@@ -555,9 +478,7 @@ export default function Demo() {
 
       </header>
 
-
       <div className="mx-auto max-w-7xl px-6 py-10">
-
 
         {/* TÍTULO */}
 
@@ -579,7 +500,6 @@ export default function Demo() {
 
           </div>
 
-
           {/* CADASTRAR */}
 
           <Dialog
@@ -587,15 +507,14 @@ export default function Demo() {
             onOpenChange={setCadastroAberto}
           >
 
-            <DialogTrigger asChild>
-
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
-                <Plus />
-                Cadastrar material
-              </Button>
-
+            <DialogTrigger
+              render={
+                <Button className="bg-cyan-600 hover:bg-cyan-700" />
+              }
+            >
+              <Plus />
+              Cadastrar material
             </DialogTrigger>
-
 
             <DialogContent className="sm:max-w-xl">
 
@@ -611,7 +530,6 @@ export default function Demo() {
 
               </DialogHeader>
 
-
               <form
                 onSubmit={cadastrarMaterial}
                 className="space-y-4"
@@ -620,6 +538,7 @@ export default function Demo() {
                 <div className="grid gap-4 sm:grid-cols-2">
 
                   <div>
+
                     <Label htmlFor="codigo">
                       Código
                     </Label>
@@ -636,10 +555,11 @@ export default function Demo() {
                         })
                       }
                     />
+
                   </div>
 
-
                   <div>
+
                     <Label htmlFor="nomeMaterial">
                       Material
                     </Label>
@@ -656,8 +576,8 @@ export default function Demo() {
                         })
                       }
                     />
-                  </div>
 
+                  </div>
 
                   <div>
 
@@ -694,7 +614,6 @@ export default function Demo() {
 
                   </div>
 
-
                   <div>
 
                     <Label htmlFor="unidade">
@@ -715,7 +634,6 @@ export default function Demo() {
                     />
 
                   </div>
-
 
                   <div>
 
@@ -738,7 +656,6 @@ export default function Demo() {
                     />
 
                   </div>
-
 
                   <div>
 
@@ -764,15 +681,11 @@ export default function Demo() {
 
                 </div>
 
-
                 {erroCadastro && (
-
                   <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
                     {erroCadastro}
                   </p>
-
                 )}
-
 
                 <DialogFooter>
 
@@ -803,7 +716,6 @@ export default function Demo() {
 
         </div>
 
-
         {/* INDICADORES */}
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -832,7 +744,6 @@ export default function Demo() {
 
           </Card>
 
-
           <Card>
 
             <CardContent className="flex items-center justify-between p-6">
@@ -857,7 +768,6 @@ export default function Demo() {
 
           </Card>
 
-
           <Card>
 
             <CardContent className="flex items-center justify-between p-6">
@@ -881,7 +791,6 @@ export default function Demo() {
             </CardContent>
 
           </Card>
-
 
           <Card>
 
@@ -909,7 +818,6 @@ export default function Demo() {
 
         </section>
 
-
         {/* GRÁFICOS */}
 
         <section className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -927,7 +835,6 @@ export default function Demo() {
               </CardDescription>
 
             </CardHeader>
-
 
             <CardContent>
 
@@ -966,7 +873,6 @@ export default function Demo() {
 
           </Card>
 
-
           <Card>
 
             <CardHeader>
@@ -980,7 +886,6 @@ export default function Demo() {
               </CardDescription>
 
             </CardHeader>
-
 
             <CardContent>
 
@@ -1007,12 +912,10 @@ export default function Demo() {
                   >
 
                     {dadosSituacoes.map((item) => (
-
                       <Cell
                         key={item.nome}
                         fill={item.cor}
                       />
-
                     ))}
 
                   </Pie>
@@ -1020,7 +923,6 @@ export default function Demo() {
                 </PieChart>
 
               </ChartContainer>
-
 
               <div className="mt-3 flex flex-wrap justify-center gap-5 text-sm">
 
@@ -1032,7 +934,6 @@ export default function Demo() {
 
                 </span>
 
-
                 <span className="flex items-center gap-2">
 
                   <span className="h-3 w-3 rounded-full bg-amber-500" />
@@ -1040,7 +941,6 @@ export default function Demo() {
                   Estoque baixo
 
                 </span>
-
 
                 <span className="flex items-center gap-2">
 
@@ -1057,7 +957,6 @@ export default function Demo() {
           </Card>
 
         </section>
-
 
         {/* TABELA */}
 
@@ -1087,7 +986,6 @@ export default function Demo() {
 
           </CardHeader>
 
-
           <CardContent>
 
             {/* FILTROS */}
@@ -1112,7 +1010,6 @@ export default function Demo() {
 
               </div>
 
-
               <div className="relative">
 
                 <SlidersHorizontal
@@ -1133,20 +1030,17 @@ export default function Demo() {
                   </option>
 
                   {categorias.map((item) => (
-
                     <option
                       key={item}
                       value={item}
                     >
                       {item}
                     </option>
-
                   ))}
 
                 </select>
 
               </div>
-
 
               <select
                 className="h-10 w-full rounded-md border bg-white px-3 text-sm"
@@ -1174,7 +1068,6 @@ export default function Demo() {
 
               </select>
 
-
               <Button
                 variant="outline"
                 onClick={limparFiltros}
@@ -1184,7 +1077,6 @@ export default function Demo() {
               </Button>
 
             </div>
-
 
             {/* TABELA RESPONSIVA */}
 
@@ -1231,7 +1123,6 @@ export default function Demo() {
                   </TableRow>
 
                 </TableHeader>
-
 
                 <TableBody>
 
@@ -1328,7 +1219,6 @@ export default function Demo() {
 
       </div>
 
-
       {/* DIALOG MOVIMENTAÇÃO */}
 
       <Dialog
@@ -1350,7 +1240,6 @@ export default function Demo() {
 
           </DialogHeader>
 
-
           {materialMovimento && (
 
             <form
@@ -1369,16 +1258,20 @@ export default function Demo() {
                 </p>
 
                 <p className="mt-3 text-sm">
+
                   Saldo disponível:
+
                   <strong className="ml-2">
+
                     {materialMovimento.quantidade}
                     {" "}
                     {materialMovimento.unidade}
+
                   </strong>
+
                 </p>
 
               </div>
-
 
               <div>
 
@@ -1404,10 +1297,12 @@ export default function Demo() {
                       setTipoMovimento("entrada")
                     }
                   >
-                    <ArrowUp />
-                    Entrada
-                  </Button>
 
+                    <ArrowUp />
+
+                    Entrada
+
+                  </Button>
 
                   <Button
                     type="button"
@@ -1425,14 +1320,16 @@ export default function Demo() {
                       setTipoMovimento("saida")
                     }
                   >
+
                     <ArrowDown />
+
                     Saída
+
                   </Button>
 
                 </div>
 
               </div>
-
 
               <div>
 
@@ -1456,7 +1353,6 @@ export default function Demo() {
 
               </div>
 
-
               {erroMovimento && (
 
                 <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
@@ -1464,7 +1360,6 @@ export default function Demo() {
                 </p>
 
               )}
-
 
               <DialogFooter>
 
@@ -1477,7 +1372,6 @@ export default function Demo() {
                 >
                   Cancelar
                 </Button>
-
 
                 <Button
                   type="submit"
@@ -1497,7 +1391,5 @@ export default function Demo() {
       </Dialog>
 
     </main>
-
   );
-
 }
